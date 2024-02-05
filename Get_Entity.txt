@@ -1,0 +1,23 @@
+  method QUESTIONSET_GET_ENTITY.
+ DATA: ls_key_tab LIKE LINE OF it_key_tab,
+       ls_question   TYPE z105_question,
+          lv_message TYPE bapi_msg.
+
+  IF it_key_tab IS NOT INITIAL.
+      "READ TABLE it_key_tab INTO ls_key_tab WITH KEY name = 'Id'.
+    ls_key_tab = it_key_tab[ name = 'Fid' ].
+
+      IF ls_key_tab IS NOT INITIAL.
+        Select SINGLE * from z105_Question INTO ls_question
+          WHERE z105_Question~fid = ls_key_tab-value.
+
+ IF sy-subrc <> 0.
+          RAISE EXCEPTION TYPE /iwbep/cx_mgw_busi_exception
+            EXPORTING
+              message = lv_message.
+        ELSE.
+          MOVE-CORRESPONDING ls_question TO er_entity.
+        ENDIF.
+      ENDIF.
+    ENDIF.
+  ENDMETHOD.

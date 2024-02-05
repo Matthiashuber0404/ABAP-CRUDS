@@ -1,0 +1,24 @@
+  method PERSONSET_UPDATE_ENTITY.
+DATA: ls_person_odata TYPE z105_person,
+          lv_message     TYPE bapi_msg VALUE 'Fehler'.
+
+    IF io_data_provider IS BOUND.
+      io_data_provider->read_entry_data(
+        IMPORTING
+          es_data = ls_person_odata
+      ).
+    ENDIF.
+********************************************
+    IF ls_person_odata IS NOT INITIAL.
+      UPDATE z105_person
+        SET pershighscore = @ls_person_odata-pershighscore, passwort = @ls_person_odata-passwort
+      WHERE pid = @ls_person_odata-pid.
+      IF sy-subrc <> 0.
+        RAISE EXCEPTION TYPE /iwbep/cx_mgw_busi_exception
+          EXPORTING
+            message = lv_message.
+      ELSE.
+        MOVE-CORRESPONDING ls_person_odata TO er_entity.
+      ENDIF.
+    ENDIF.
+  endmethod.

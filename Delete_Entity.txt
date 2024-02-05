@@ -1,0 +1,28 @@
+  method HIGHSCORESET_DELETE_ENTITY.
+    DATA: ls_key_tab LIKE LINE OF it_key_tab,
+          lv_message TYPE bapi_msg.
+
+**************************
+* Lesen des Satzes
+**************************
+    IF it_key_tab IS NOT INITIAL.
+      "READ TABLE it_key_tab INTO ls_key_tab WITH KEY name = 'Id'.
+    ls_key_tab = it_key_tab[ name = 'Hid' ].
+
+      IF ls_key_tab IS NOT INITIAL.
+        DELETE FROM z105_highscore
+        WHERE z105_highscore~pid = ls_key_tab-value.
+        IF sy-subrc <> 0.
+          RAISE EXCEPTION TYPE /iwbep/cx_mgw_busi_exception
+            EXPORTING
+              message = lv_message.
+        ELSE.
+          " Fehler
+        ENDIF.
+      ENDIF.
+    ENDIF.
+  endmethod.
+
+
+
+

@@ -1,0 +1,44 @@
+method PERSONSET_CREATE_ENTITY.
+  DATA: ls_person_odata TYPE z105_person,
+          ls_person      TYPE z105_person,
+          lv_message     TYPE bapi_msg VALUE 'Fehler',
+          gn_switch type I.
+
+    IF io_data_provider IS BOUND.
+      io_data_provider->read_entry_data(
+        IMPORTING
+          es_data = ls_person_odata
+      ).
+    ENDIF.
+********************************************
+    IF ls_person_odata IS NOT INITIAL.
+      MOVE-CORRESPONDING ls_person_odata TO ls_person.
+      SELECT MAX( pid ) FROM z105_person INTO ls_person-pid.
+      ls_person-pid = ls_person-pid + 1.
+
+      SELECT * FROM z105_person into TABLE @Data(gt_zw).
+
+        gn_switch = 0.
+
+      LOOP at gt_zw into DATA(gs_zw).
+          IF ls_person-username eq gs_zw-username.
+            gn_switch = 1.
+           ENDIF.
+
+
+      ENDLOOP.
+
+IF gn_switch = 0.
+
+
+      INSERT INTO z105_person VALUES ls_person.
+      IF sy-subrc <> 0.
+        RAISE EXCEPTION TYPE /iwbep/cx_mgw_busi_exception
+          EXPORTING
+            message = lv_message.
+      ELSE.
+        MOVE-CORRESPONDING ls_person_odata TO er_entity.
+      ENDIF.
+    ENDIF.
+endif.
+  endmethod.

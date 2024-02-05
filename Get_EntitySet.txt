@@ -1,0 +1,51 @@
+ method QUIZANSWERSET_GET_ENTITYSET.
+
+   DATA:lt_filter1  TYPE /iwbep/t_cod_select_options,
+        lv_where        TYPE string.
+   DATA:lv_random type i,
+         lv_order type string.
+
+CALL FUNCTION 'QF05_RANDOM_INTEGER'
+  EXPORTING
+    ran_int_min = 1
+    ran_int_max = 6
+  IMPORTING
+    ran_int     = lv_random.
+
+  lv_where = ||.
+
+  LOOP AT it_filter_select_options ASSIGNING FIELD-SYMBOL(<fs_filter>).
+    CASE <fs_filter>-property.
+      WHEN 'Aid'.
+        lt_filter1 = <fs_filter>-select_options.
+    ENDCASE.
+  ENDLOOP.
+
+  IF lines( lt_filter1 ) > 0.
+    lv_where = |aid IN lt_filter1 |.
+  ENDIF.
+
+
+if lv_random = 1.
+  lv_order = 'Z105_Quizanswer~antwort DESCENDING'.
+elseif lv_random = 2.
+  lv_order = 'Z105_Quizanswer~antwort'.
+elseif lv_random = 3.
+  lv_order = 'Z105_Quizanswer~aid DESCENDING'.
+elseif lv_random = 4.
+  lv_order = 'Z105_Quizanswer~aid '.
+  elseif lv_random = 5.
+  lv_order = 'Z105_Quizanswer~richtig '.
+  elseif lv_random = 6.
+  lv_order = 'Z105_Quizanswer~richtig DESCENDING '.
+endif.
+
+
+
+  SELECT * FROM Z105_Quizanswer
+    INTO TABLE et_entityset
+    WHERE (lv_where)
+    ORDER BY (lv_order) .
+
+
+  endmethod.
